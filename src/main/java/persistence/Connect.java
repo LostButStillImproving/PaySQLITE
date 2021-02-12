@@ -4,9 +4,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class connect {
+public class Connect {
 
-    public static void connect() {
+    public static Connection connect() {
         Connection conn = null;
 
         try {
@@ -19,15 +19,8 @@ public class connect {
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException ex) {
-                System.out.println(ex.getMessage());
-            }
         }
+        return conn;
     }
 
     public static void main(String[] args) {
