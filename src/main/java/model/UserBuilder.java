@@ -29,10 +29,7 @@ public class UserBuilder {
         userHandler.addUser(personUser);
         userHandler.addUser(companyUser);
 
-
-
         transactionHandler.transferMoneyFromUserToUser(companyUser, personUser, 5000);
 
-        userHandler.deleteUser(companyUser);
     }
 }

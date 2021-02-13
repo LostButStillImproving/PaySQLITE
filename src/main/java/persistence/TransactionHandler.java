@@ -15,6 +15,9 @@ public class TransactionHandler {
         var userFromName = userFrom.getUsername();
         var userToName = userTo.getUsername();
 
+        var userFromId = getID(userFromName);
+        var userToId = getID(userToName);
+
         var userFromBalance = getBalanceFromDB(userFromName);
         var userToBalance = getBalanceFromDB(userToName);
 
@@ -24,6 +27,7 @@ public class TransactionHandler {
 
         CONNECTOR.beginTransaction();
         updateBalances(userFromBalanceAfter, userToBalanceAfter, userFromName, userToName);
+        insertIntoTransactionTable(userFromId, userToId, amount);
         CONNECTOR.commit();
         CONNECTOR.closeConnection();
     }
@@ -57,5 +61,36 @@ public class TransactionHandler {
 
         preparedStatement = CONNECTOR.getConnection().prepareStatement(updateToBalance);
         preparedStatement.executeUpdate();
+    }
+
+    private void insertIntoTransactionTable(int userFromId, int userToId, double amount) throws SQLException {
+
+        var insertStatement = "INSERT INTO Transactions(from_user_id, to_user_id, amount) VALUES(?, ?, ?)";
+
+        PreparedStatement preparedStatement = CONNECTOR.getConnection().prepareStatement(insertStatement);
+        preparedStatement.setInt(1,userFromId);
+        preparedStatement.setInt(2, userToId);
+        preparedStatement.setDouble(3, amount);
+        preparedStatement.executeUpdate();
+
+    }
+
+    private int getID(String username) {
+
+        var selectStatement = "SELECT id FROM Users WHERE username = " + "'" + username + "'";
+        var id = 0;
+
+        try (
+                var statement  = CONNECTOR.getConnection().createStatement();
+                var resultSet    = statement.executeQuery(selectStatement)){
+
+            while (resultSet.next()) {
+                id =  resultSet.getInt("id");
+            }
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return id;
     }
 }
