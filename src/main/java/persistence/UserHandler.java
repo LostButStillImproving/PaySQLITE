@@ -9,6 +9,7 @@ import java.sql.*;
 public class UserHandler {
 
     Connection connection;
+
     public void addUser(User user) throws SQLException {
 
         if (user instanceof Company) {
@@ -21,7 +22,7 @@ public class UserHandler {
 
     private void addPerson(Person personUser) throws SQLException {
         try {
-            connectToDB(Connect.connect());
+            connectToDB(DatabaseConnector.connect());
             beginTransaction();
             insertIntoPersonsTable(personUser);
             insertIntoUsersTable(personUser);
@@ -36,7 +37,7 @@ public class UserHandler {
 
     private void addCompany(Company companyUser) throws SQLException {
         try {
-            connectToDB(Connect.connect());
+            connectToDB(DatabaseConnector.connect());
             beginTransaction();
             insertIntoCompanyTable(companyUser);
             insertIntoUsersTable(companyUser);
@@ -105,9 +106,11 @@ public class UserHandler {
         try (
                 Statement stmt  = this.connection.createStatement();
                 ResultSet rs    = stmt.executeQuery(sql)){
+
             while (rs.next()) {
                 id =  rs.getInt("id");
             }
+
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
