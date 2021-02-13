@@ -18,33 +18,14 @@ public class UserHandler {
             addPersonUser((Person) user);
         }
     }
-    public void addPersonUser(Person personUser) throws SQLException {
+
+    private void addPersonUser(Person personUser) throws SQLException {
         try {
             this.connection = Connect.connect();
-            String begin = "BEGIN TRANSACTION";
-            String insertIntoPersonsTable = "INSERT INTO Persons(firstname, lastname) VALUES(?, ?)";
-            String insertIntoUsersTable = "INSERT INTO Users(username, phonenumber, Balance,company_id,person_id) VALUES(?, ?, ?, ?, ?)";
-            String end = "COMMIT";
-
-            PreparedStatement preparedStatement = connection.prepareStatement(begin);
-            preparedStatement.executeUpdate();
-
-            preparedStatement = connection.prepareStatement(insertIntoPersonsTable);
-            preparedStatement.setString(1,personUser.getFirstName());
-            preparedStatement.setString(2, personUser.getLastName());
-            preparedStatement.executeUpdate();
-
-            int personID = getNewestPersonID();
-
-            preparedStatement = connection.prepareStatement(insertIntoUsersTable);
-            preparedStatement.setString(1,personUser.getUsername());
-            preparedStatement.setInt(2, personUser.getPhonenumber());
-            preparedStatement.setDouble(3, personUser.getBalance());
-            preparedStatement.setInt(5, personID);
-            preparedStatement.executeUpdate();
-
-            preparedStatement = connection.prepareStatement(end);
-            preparedStatement.executeUpdate();
+            beginTransaction();
+            insertIntoPersonsTable(personUser);
+            insertIntoUsersTable(personUser);
+            commit();
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -53,41 +34,74 @@ public class UserHandler {
         closeConnection();
     }
 
-
-    public void addCompanyUser(Company companyUser) throws SQLException {
+    private void addCompanyUser(Company companyUser) throws SQLException {
         try {
             this.connection = Connect.connect();
-            String begin = "BEGIN TRANSACTION";
-            String insertIntoCompanyTable = "INSERT INTO Companies(companyName, country, CVR ) VALUES(?, ?, ?)";
-            String insertIntoUsersTable = "INSERT INTO Users(username, phonenumber, Balance,company_id,person_id) VALUES(?, ?, ?, ?, ?)";
-            String end = "COMMIT";
+            beginTransaction();
+            insertIntoCompanyTable(companyUser);
+            insertIntoUsersTable(companyUser);
+            commit();
 
-            PreparedStatement preparedStatement = connection.prepareStatement(begin);
-            preparedStatement.executeUpdate();
-
-            preparedStatement = connection.prepareStatement(insertIntoCompanyTable);
-            preparedStatement.setString(1,companyUser.getCompanyName());
-            preparedStatement.setString(2, companyUser.getCountry());
-            preparedStatement.setInt(3, companyUser.getCVR());
-            preparedStatement.executeUpdate();
-
-            int companyID = getNewestCompanyID();
-
-            preparedStatement = connection.prepareStatement(insertIntoUsersTable);
-            preparedStatement.setString(1,companyUser.getUsername());
-            preparedStatement.setInt(2, companyUser.getPhonenumber());
-            preparedStatement.setDouble(3, companyUser.getBalance());
-            preparedStatement.setInt(4, companyID);
-            preparedStatement.executeUpdate();
-
-            preparedStatement = connection.prepareStatement(end);
-            preparedStatement.executeUpdate();
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
 
         closeConnection();
+    }
+
+    private void insertIntoCompanyTable(Company companyUser) throws SQLException {
+
+        String insertIntoCompanyTable = "INSERT INTO Companies(companyName, country, CVR ) VALUES(?, ?, ?)";
+
+        PreparedStatement preparedStatement = connection.prepareStatement(insertIntoCompanyTable);
+        preparedStatement.setString(1,companyUser.getCompanyName());
+        preparedStatement.setString(2, companyUser.getCountry());
+        preparedStatement.setInt(3, companyUser.getCVR());
+        preparedStatement.executeUpdate();
+    }
+
+
+    private void insertIntoPersonsTable(Person personUser) throws SQLException {
+        String insertIntoPersonsTable = "INSERT INTO Persons(firstname, lastname) VALUES(?, ?)";
+        PreparedStatement preparedStatement = connection.prepareStatement(insertIntoPersonsTable);
+        preparedStatement.setString(1,personUser.getFirstName());
+        preparedStatement.setString(2, personUser.getLastName());
+        preparedStatement.executeUpdate();
+    }
+
+    private void insertIntoUsersTable(User user) throws SQLException {
+
+        String insertIntoUsersTable = "INSERT INTO Users(username, phonenumber, Balance,company_id,person_id) VALUES(?, ?, ?, ?, ?)";
+
+        PreparedStatement preparedStatement = connection.prepareStatement(insertIntoUsersTable);
+        preparedStatement.setString(1,user.getUsername());
+        preparedStatement.setInt(2, user.getPhonenumber());
+        preparedStatement.setDouble(3, user.getBalance());
+
+        if (user instanceof Company) {
+            int companyID = getNewestCompanyID();
+            preparedStatement.setInt(4, companyID);
+        }
+
+        if (user instanceof Person) {
+            int personID = getNewestPersonID();
+            preparedStatement.setInt(5, personID);
+        }
+
+        preparedStatement.executeUpdate();
+    }
+
+    private void beginTransaction() throws SQLException {
+        String begin = "BEGIN TRANSACTION";
+        PreparedStatement preparedStatement = connection.prepareStatement(begin);
+        preparedStatement.executeUpdate();
+    }
+
+    private void commit() throws SQLException {
+        String end = "COMMIT";
+        PreparedStatement preparedStatement = connection.prepareStatement(end);
+        preparedStatement.executeUpdate();
     }
 
     private void closeConnection() throws SQLException {
