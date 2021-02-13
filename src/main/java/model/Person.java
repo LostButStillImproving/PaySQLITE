@@ -2,8 +2,8 @@ package model;
 
 public class Person extends User{
 
-    private String firstName;
-    private String lastName;
+    private final String firstName;
+    private final String lastName;
 
     public Person(String username, int phonenumber, double balance,
                   String firstName, String lastName) {

@@ -2,9 +2,9 @@ package model;
 
 public class Company extends User{
 
-    private String companyName;
-    private String country;
-    private int CVR;
+    private final String companyName;
+    private final String country;
+    private final int CVR;
 
     public Company(String username, int phonenumber, double balance, String name, String country, int CVR) {
         super(username, phonenumber, balance);

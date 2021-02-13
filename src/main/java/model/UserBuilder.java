@@ -1,7 +1,7 @@
 package model;
 
+import persistence.TransactionHandler;
 import persistence.UserHandler;
-
 import java.sql.SQLException;
 
 public class UserBuilder {
@@ -20,14 +20,19 @@ public class UserBuilder {
 
     public static void main(String[] args) throws SQLException {
         var userBuilder = new UserBuilder();
-        var personUser = userBuilder.createPersonUser("MrAwesume", 20502304, 200.,"Mike", "Rasmussen");
-        var personUser2 = userBuilder.createPersonUser("Mrmeee", 20502304, 200.,"Mike", "Rasmussen");
-
-        var companyUser = userBuilder.createCompanyUser("asusvenwqewqequs",20202, 10000., "Google", "USA", 23232);
-        var companyUser1 = userBuilder.createCompanyUser("asusvenus1",20202, 10000., "Google", "USA", 23232);
         var userHandler = new UserHandler();
+        var transactionHandler = new TransactionHandler();
 
+        var personUser = userBuilder.createPersonUser("From", 20502304, 10000.,"Mike", "Rasmussen");
+        var companyUser = userBuilder.createCompanyUser("To",20202, 5000., "Google", "USA", 23232);
+
+        userHandler.addUser(personUser);
         userHandler.addUser(companyUser);
 
+
+
+        transactionHandler.transferMoneyFromUserToUser(companyUser, personUser, 5000);
+
+        userHandler.deleteUser(companyUser);
     }
 }

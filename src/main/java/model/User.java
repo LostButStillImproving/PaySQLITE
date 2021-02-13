@@ -2,9 +2,9 @@ package model;
 
 public class User {
 
-    private String username;
-    private int phonenumber;
-    private double balance;
+    private final String username;
+    private final int phonenumber;
+    private final double balance;
 
     public User(String username, int phonenumber, double balance) {
         this.username = username;

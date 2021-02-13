@@ -6,9 +6,9 @@ import model.User;
 
 import java.sql.*;
 
-public class UserHandler {
+import static persistence.DatabaseConnector.*;
 
-    Connection connection;
+public class UserHandler {
 
     public void addUser(User user) throws SQLException {
 
@@ -20,44 +20,69 @@ public class UserHandler {
         }
     }
 
-    private void addPerson(Person personUser) throws SQLException {
+    public void deleteUser(User user) throws SQLException {
 
         try {
-            connectToDB(DatabaseConnector.connect());
-            beginTransaction();
-            insertIntoPersonsTable(personUser);
-            insertIntoUsersTable(personUser);
-            commit();
+            CONNECTOR.connect();
+            CONNECTOR.beginTransaction();
+            deleteUserFromTable(user.getUsername());
+            CONNECTOR.commit();
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
 
-        closeConnection();
+        CONNECTOR.closeConnection();
+    }
+
+    private void deleteUserFromTable(String username) throws SQLException {
+
+        var deleteUserFromTable = "DELETE FROM Users WHERE username = " + "'" + username + "'";
+
+        var preparedStatement = CONNECTOR.
+                getConnection().prepareStatement(deleteUserFromTable);
+        preparedStatement.executeUpdate();
+    }
+
+    private void addPerson(Person personUser) throws SQLException {
+
+        try {
+            CONNECTOR.connect();
+            CONNECTOR.beginTransaction();
+            insertIntoPersonsTable(personUser);
+            insertIntoUsersTable(personUser);
+            CONNECTOR.commit();
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        CONNECTOR.closeConnection();
     }
 
     private void addCompany(Company companyUser) throws SQLException {
 
         try {
-            connectToDB(DatabaseConnector.connect());
-            beginTransaction();
+            CONNECTOR.connect();
+            CONNECTOR.beginTransaction();
             insertIntoCompanyTable(companyUser);
             insertIntoUsersTable(companyUser);
-            commit();
+            CONNECTOR.commit();
 
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
 
-        closeConnection();
+        CONNECTOR.closeConnection();
     }
 
     private void insertIntoCompanyTable(Company companyUser) throws SQLException {
 
-        String insertIntoCompanyTable = "INSERT INTO Companies(companyName, country, CVR ) VALUES(?, ?, ?)";
+        var insertIntoCompanyTable = "INSERT INTO Companies(companyName, country, CVR ) VALUES(?, ?, ?)";
+        var preparedStatement = CONNECTOR.getConnection().
+                prepareStatement(insertIntoCompanyTable);
 
-        PreparedStatement preparedStatement = connection.prepareStatement(insertIntoCompanyTable);
         preparedStatement.setString(1,companyUser.getCompanyName());
         preparedStatement.setString(2, companyUser.getCountry());
         preparedStatement.setInt(3, companyUser.getCVR());
@@ -66,8 +91,9 @@ public class UserHandler {
 
     private void insertIntoPersonsTable(Person personUser) throws SQLException {
 
-        String insertIntoPersonsTable = "INSERT INTO Persons(firstname, lastname) VALUES(?, ?)";
-        PreparedStatement preparedStatement = connection.prepareStatement(insertIntoPersonsTable);
+        var insertIntoPersonsTable = "INSERT INTO Persons(firstname, lastname) VALUES(?, ?)";
+
+        PreparedStatement preparedStatement = CONNECTOR.getConnection().prepareStatement(insertIntoPersonsTable);
         preparedStatement.setString(1,personUser.getFirstName());
         preparedStatement.setString(2, personUser.getLastName());
         preparedStatement.executeUpdate();
@@ -75,20 +101,20 @@ public class UserHandler {
 
     private void insertIntoUsersTable(User user) throws SQLException {
 
-        String insertIntoUsersTable = "INSERT INTO Users(username, phonenumber, Balance,company_id,person_id) VALUES(?, ?, ?, ?, ?)";
+        var insertIntoUsersTable = "INSERT INTO Users(username, phonenumber, Balance,company_id,person_id) VALUES(?, ?, ?, ?, ?)";
 
-        PreparedStatement preparedStatement = connection.prepareStatement(insertIntoUsersTable);
+        PreparedStatement preparedStatement = CONNECTOR.getConnection().prepareStatement(insertIntoUsersTable);
         preparedStatement.setString(1,user.getUsername());
         preparedStatement.setInt(2, user.getPhonenumber());
         preparedStatement.setDouble(3, user.getBalance());
 
         if (user instanceof Company) {
-            int companyID = getNewestCompanyID();
+            var companyID = getNewestCompanyID();
             preparedStatement.setInt(4, companyID);
         }
 
         if (user instanceof Person) {
-            int personID = getNewestPersonID();
+            var personID = getNewestPersonID();
             preparedStatement.setInt(5, personID);
         }
 
@@ -97,57 +123,31 @@ public class UserHandler {
 
     private int getNewestCompanyID() {
 
-        String sql = "SELECT id FROM Companies ORDER BY id DESC LIMIT 1";
+        var sql = "SELECT id FROM Companies ORDER BY id DESC LIMIT 1";
 
         return getID(sql);
 
     }private int getNewestPersonID() {
 
-        String sql = "SELECT id FROM Persons ORDER BY id DESC LIMIT 1";
+        var sql = "SELECT id FROM Persons ORDER BY id DESC LIMIT 1";
 
         return getID(sql);
     }
 
     private int getID(String sql) {
 
-        int id = 0;
+        var id = 0;
         try (
-                Statement stmt  = this.connection.createStatement();
-                ResultSet rs    = stmt.executeQuery(sql)){
+                var statement  = CONNECTOR.getConnection().createStatement();
+                var resultSet    = statement.executeQuery(sql)){
 
-            while (rs.next()) {
-                id =  rs.getInt("id");
+            while (resultSet.next()) {
+                id =  resultSet.getInt("id");
             }
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
         return id;
-    }
-
-    private void beginTransaction() throws SQLException {
-
-        String begin = "BEGIN TRANSACTION";
-        PreparedStatement preparedStatement = connection.prepareStatement(begin);
-        preparedStatement.executeUpdate();
-    }
-
-    private void commit() throws SQLException {
-
-        String end = "COMMIT";
-        PreparedStatement preparedStatement = connection.prepareStatement(end);
-        preparedStatement.executeUpdate();
-    }
-
-    private void connectToDB(Connection connect) {
-
-        this.connection = connect;
-    }
-
-    private void closeConnection() throws SQLException {
-
-        assert connection != null;
-        connection.close();
-        connectToDB(null);
     }
 }

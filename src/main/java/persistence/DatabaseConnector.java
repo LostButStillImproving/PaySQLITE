@@ -2,28 +2,56 @@ package persistence;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class DatabaseConnector {
+public enum DatabaseConnector {
 
-    public static Connection connect() {
-        Connection conn = null;
+    CONNECTOR;
+
+    Connection connection;
+
+    public void connect() {
+
+        this.connection = null;
 
         try {
             // db parameters
             String url = "jdbc:sqlite:db/database.sqlite";
             // create a connection to the database
-            conn = DriverManager.getConnection(url);
+            connection = DriverManager.getConnection(url);
 
             System.out.println("Connection to SQLite has been established.");
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        return conn;
     }
 
-    public static void main(String[] args) {
-        connect();
+    void beginTransaction() throws SQLException {
+
+        String begin = "BEGIN TRANSACTION";
+        PreparedStatement preparedStatement = connection.prepareStatement(begin);
+        preparedStatement.executeUpdate();
+    }
+
+    void commit() throws SQLException {
+
+        String commit = "COMMIT";
+        PreparedStatement preparedStatement = connection.prepareStatement(commit);
+        preparedStatement.executeUpdate();
+    }
+
+
+    void closeConnection() throws SQLException {
+
+        assert connection != null;
+        connection.close();
+        connection = null;
+    }
+
+    public Connection getConnection() {
+
+        return connection;
     }
 }
