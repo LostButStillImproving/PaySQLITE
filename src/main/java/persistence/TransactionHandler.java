@@ -12,16 +12,18 @@ public class TransactionHandler {
     public void transferMoneyFromUserToUser(User userFrom, User userTo, double amount) throws SQLException {
 
         CONNECTOR.connect();
+        var userFromName = userFrom.getUsername();
+        var userToName = userTo.getUsername();
 
-        var userFromBalance = getBalanceFromDB(userFrom.getUsername());
-        var userToBalance = getBalanceFromDB(userTo.getUsername());
+        var userFromBalance = getBalanceFromDB(userFromName);
+        var userToBalance = getBalanceFromDB(userToName);
 
         var userFromBalanceAfter = userFromBalance - amount;
         var userToBalanceAfter = userToBalance + amount;
 
 
         CONNECTOR.beginTransaction();
-        updateBalances(userFromBalanceAfter, userToBalanceAfter, userFrom.getUsername(), userTo.getUsername());
+        updateBalances(userFromBalanceAfter, userToBalanceAfter, userFromName, userToName);
         CONNECTOR.commit();
         CONNECTOR.closeConnection();
     }
@@ -49,9 +51,10 @@ public class TransactionHandler {
 
         var updateFromBalance = "UPDATE Users SET Balance = " + balanceFrom + " WHERE username = " + "'" + usernameFrom + "'";
         var updateToBalance = "UPDATE Users SET Balance = " + balanceTO + " WHERE username = " + "'" + usernameTo + "'";
-        var preparedStatement = CONNECTOR.getConnection().prepareStatement(updateFromBalance);
 
+        var preparedStatement = CONNECTOR.getConnection().prepareStatement(updateFromBalance);
         preparedStatement.executeUpdate();
+
         preparedStatement = CONNECTOR.getConnection().prepareStatement(updateToBalance);
         preparedStatement.executeUpdate();
     }
