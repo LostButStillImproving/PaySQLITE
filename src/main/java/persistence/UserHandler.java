@@ -21,6 +21,7 @@ public class UserHandler {
     }
 
     private void addPerson(Person personUser) throws SQLException {
+
         try {
             connectToDB(DatabaseConnector.connect());
             beginTransaction();
@@ -36,6 +37,7 @@ public class UserHandler {
     }
 
     private void addCompany(Company companyUser) throws SQLException {
+
         try {
             connectToDB(DatabaseConnector.connect());
             beginTransaction();
@@ -63,6 +65,7 @@ public class UserHandler {
     }
 
     private void insertIntoPersonsTable(Person personUser) throws SQLException {
+
         String insertIntoPersonsTable = "INSERT INTO Persons(firstname, lastname) VALUES(?, ?)";
         PreparedStatement preparedStatement = connection.prepareStatement(insertIntoPersonsTable);
         preparedStatement.setString(1,personUser.getFirstName());
@@ -93,15 +96,20 @@ public class UserHandler {
     }
 
     private int getNewestCompanyID() {
+
         String sql = "SELECT id FROM Companies ORDER BY id DESC LIMIT 1";
+
         return getID(sql);
 
     }private int getNewestPersonID() {
+
         String sql = "SELECT id FROM Persons ORDER BY id DESC LIMIT 1";
+
         return getID(sql);
     }
 
     private int getID(String sql) {
+
         int id = 0;
         try (
                 Statement stmt  = this.connection.createStatement();
@@ -118,22 +126,26 @@ public class UserHandler {
     }
 
     private void beginTransaction() throws SQLException {
+
         String begin = "BEGIN TRANSACTION";
         PreparedStatement preparedStatement = connection.prepareStatement(begin);
         preparedStatement.executeUpdate();
     }
 
     private void commit() throws SQLException {
+
         String end = "COMMIT";
         PreparedStatement preparedStatement = connection.prepareStatement(end);
         preparedStatement.executeUpdate();
     }
 
     private void connectToDB(Connection connect) {
+
         this.connection = connect;
     }
 
     private void closeConnection() throws SQLException {
+
         assert connection != null;
         connection.close();
         connectToDB(null);
