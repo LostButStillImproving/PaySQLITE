@@ -20,12 +20,14 @@ public class UserBuilder {
 
     public static void main(String[] args) throws SQLException {
         var userBuilder = new UserBuilder();
-        var personUser = userBuilder.createPersonUser("asusvenus", 20502304, 200.,"Mike", "Rasmussen");
+        var personUser = userBuilder.createPersonUser("MrAwesume", 20502304, 200.,"Mike", "Rasmussen");
 
-        var companyUser = userBuilder.createCompanyUser("companyUser",20202, 10000., "Google", "USA", 23232);
+        var companyUser = userBuilder.createCompanyUser("asusvenus",20202, 10000., "Google", "USA", 23232);
+        var companyUser1 = userBuilder.createCompanyUser("asusvenus1",20202, 10000., "Google", "USA", 23232);
         var userHandler = new UserHandler();
 
-        userHandler.addUser(personUser);
         userHandler.addUser(companyUser);
+        userHandler.addUser(personUser);
+        userHandler.addUser(companyUser1);
     }
 }
