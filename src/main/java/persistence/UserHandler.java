@@ -21,14 +21,11 @@ public class UserHandler {
     public void addPersonUser(Person personUser) throws SQLException {
         try {
             this.connection = Connect.connect();
-        } catch (Exception e) {
-            System.out.println("Couldnt connect");
-        }
-        if (connection != null) {
             addPersontoPersonTable(personUser);
             int personID = getNewestPersonID();
             addPersonToUserTable(personUser, personID);
-
+        } catch (Exception e) {
+            System.out.println("Couldnt connect");
         }
 
         assert connection != null;
@@ -63,21 +60,6 @@ public class UserHandler {
         preparedStatement.executeUpdate();
     }
 
-    private int getNewestCompanyID() {
-        String sql = "SELECT id FROM Companies ORDER BY id DESC LIMIT 1";
-        int companyID = 0;
-        try (
-                Statement stmt  = this.connection.createStatement();
-                ResultSet rs    = stmt.executeQuery(sql)){
-            while (rs.next()) {
-                companyID =  rs.getInt("id");
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return companyID;
-    }
-
     private void addCompanytoCompanyTable(Company companyUser) throws SQLException {
         String sql = "INSERT INTO Companies(companyName, country, CVR ) VALUES(?, ?, ?)";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -109,10 +91,19 @@ public class UserHandler {
 
     private int getNewestPersonID() {
         String sql = "SELECT id FROM Persons ORDER BY id DESC LIMIT 1";
+        return getID(sql);
+    }
+
+    private int getNewestCompanyID() {
+        String sql = "SELECT id FROM Companies ORDER BY id DESC LIMIT 1";
+        return getID(sql);
+    }
+
+    private int getID(String sql) {
         int personID = 0;
         try (
-             Statement stmt  = this.connection.createStatement();
-             ResultSet rs    = stmt.executeQuery(sql)){
+                Statement stmt  = this.connection.createStatement();
+                ResultSet rs    = stmt.executeQuery(sql)){
             while (rs.next()) {
                 personID =  rs.getInt("id");
             }
