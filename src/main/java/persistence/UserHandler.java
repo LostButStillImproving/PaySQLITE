@@ -101,12 +101,13 @@ public class UserHandler {
 
     private void insertIntoUsersTable(User user) throws SQLException {
 
-        var insertIntoUsersTable = "INSERT INTO Users(username, phonenumber, Balance,company_id,person_id) VALUES(?, ?, ?, ?, ?)";
+        var insertIntoUsersTable = "INSERT INTO Users(username, phonenumber, Balance,company_id,person_id, cardnumber) VALUES(?, ?, ?, ?, ?,?)";
 
         PreparedStatement preparedStatement = CONNECTOR.getConnection().prepareStatement(insertIntoUsersTable);
         preparedStatement.setString(1,user.getUsername());
         preparedStatement.setInt(2, user.getPhonenumber());
         preparedStatement.setDouble(3, user.getBalance());
+        preparedStatement.setInt(6, user.getCardnumber());
 
         if (user instanceof Company) {
             var companyID = getNewestCompanyID();
@@ -119,6 +120,26 @@ public class UserHandler {
         }
 
         preparedStatement.executeUpdate();
+    }
+
+    public UserQueryDataClass getAllUsers() {
+        CONNECTOR.connect();
+        var users = new UserQueryDataClass();
+
+        var selectStatement = "SELECT username, Balance FROM Users";
+        try (
+                var statement  = CONNECTOR.getConnection().createStatement();
+                var resultSet    = statement.executeQuery(selectStatement)){
+
+            while (resultSet.next()) {
+                 users.appendUserName(resultSet.getString("username"));
+                 users.appendBalance(resultSet.getDouble("Balance"));
+            }
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return users;
     }
 
     private int getNewestCompanyID() {
@@ -150,4 +171,5 @@ public class UserHandler {
         }
         return id;
     }
+
 }

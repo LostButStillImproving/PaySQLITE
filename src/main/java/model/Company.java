@@ -6,8 +6,8 @@ public class Company extends User{
     private final String country;
     private final int CVR;
 
-    public Company(String username, int phonenumber, double balance, String name, String country, int CVR) {
-        super(username, phonenumber, balance);
+    public Company(String username, int phonenumber, double balance, String name, String country, int CVR, int cardNumber) {
+        super(username, phonenumber, balance, cardNumber);
         this.companyName = name;
         this.country = country;
         this.CVR = CVR;

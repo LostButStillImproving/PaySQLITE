@@ -1,36 +1,39 @@
 package persistence;
 
-import model.User;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-import java.sql.*;
-
-import static persistence.DatabaseConnector.*;
+import static persistence.DatabaseConnector.CONNECTOR;
 
 public class TransactionHandler {
 
 
-    public void transferMoneyFromUserToUser(User userFrom, User userTo, double amount) throws SQLException {
+    public void transferMoneyFromUserToUser(String userNameFrom, String userNameTo, double amount) throws SQLException {
 
         CONNECTOR.connect();
-        var userFromName = userFrom.getUsername();
-        var userToName = userTo.getUsername();
 
-        var userFromId = getID(userFromName);
-        var userToId = getID(userToName);
+        if (!userNameExists(userNameFrom) || !userNameExists(userNameTo)) return;
 
-        var userFromBalance = getBalanceFromDB(userFromName);
-        var userToBalance = getBalanceFromDB(userToName);
+        var userFromId = getID(userNameFrom);
+        var userToId = getID(userNameTo);
+
+        var userFromBalance = getBalanceFromDB(userNameFrom);
+        var userToBalance = getBalanceFromDB(userNameTo);
 
         var userFromBalanceAfter = userFromBalance - amount;
         var userToBalanceAfter = userToBalance + amount;
 
 
         CONNECTOR.beginTransaction();
-        updateBalances(userFromBalanceAfter, userToBalanceAfter, userFromName, userToName);
+        updateBalances(userFromBalanceAfter, userToBalanceAfter, userNameFrom, userNameTo);
         insertIntoTransactionTable(userFromId, userToId, amount);
         CONNECTOR.commit();
         CONNECTOR.closeConnection();
     }
+
+
 
     private double getBalanceFromDB(String username) {
         var getBalanceQuery = "SELECT Balance FROM Users WHERE username = "+ "'" + username + "'";
@@ -92,5 +95,10 @@ public class TransactionHandler {
             System.out.println(e.getMessage());
         }
         return id;
+    }
+
+    private boolean userNameExists(String userName) {
+
+        return getID(userName) != 0;
     }
 }
