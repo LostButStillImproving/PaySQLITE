@@ -78,6 +78,40 @@ public class TransactionHandler {
 
     }
 
+    public TransactionQueryDataClass getAllTransactions() {
+
+        CONNECTOR.connect();
+        var transactions = new TransactionQueryDataClass();
+
+        var selectStatement = "SELECT\n" +
+                "    transaction_date as \"DATE\",\n" +
+                "    transaction_time as \"TIME(UTC)\",\n" +
+                "    u.username as 'FROM',\n" +
+                "    u1.username as 'TO',\n" +
+                "    amount as 'AMOUNT'\n" +
+                "FROM Transactions t\n" +
+                "         JOIN Users u on t.from_user_id = u.id\n" +
+                "         JOIN Users u1 on t.to_user_id = u1.id;";
+
+        try (
+                var statement  = CONNECTOR.getConnection().createStatement();
+                var resultSet    = statement.executeQuery(selectStatement)){
+
+            while (resultSet.next()) {
+                transactions.appendFromUserNames(resultSet.getString("FROM"));
+                transactions.appendToUserName(resultSet.getString("TO"));
+                transactions.appendDates(resultSet.getString("DATE"));
+                transactions.appendtimes(resultSet.getString("TIME(UTC)"));
+                transactions.appendAmounts(resultSet.getDouble("AMOUNT"));
+            }
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return transactions;
+    }
+
     private int getID(String username) {
 
         var selectStatement = "SELECT id FROM Users WHERE username = " + "'" + username + "'";

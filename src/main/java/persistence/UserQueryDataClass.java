@@ -15,11 +15,20 @@ public class UserQueryDataClass {
         this.balances.add(balance);
     }
 
-    public ArrayList<String> getUserNames() {
-        return userNames;
-    }
+    public String toString() {
 
-    public ArrayList<Double> getBalances() {
-        return balances;
+        int numberOfUsers = userNames.size();
+
+        StringBuilder toString = new StringBuilder();
+        toString.append(String.format("%-15s %15s %n", "USERNAME", "BALANCE"));
+        toString.append("-------------------------------\n");
+        for (int i = 0; i < numberOfUsers; i++) {
+            toString.append(String.format("%-15s %15s %n",
+                    userNames.get(i),
+                    balances.get(i)));
+        }
+        toString.append("-------------------------------");
+
+        return toString.toString();
     }
 }

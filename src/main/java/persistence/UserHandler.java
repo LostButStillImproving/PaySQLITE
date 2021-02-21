@@ -20,12 +20,12 @@ public class UserHandler {
         }
     }
 
-    public void deleteUser(User user) throws SQLException {
+    public void deleteUser(String userName) throws SQLException {
 
         try {
             CONNECTOR.connect();
             CONNECTOR.beginTransaction();
-            deleteUserFromTable(user.getUsername());
+            deleteUserFromTable(userName);
             CONNECTOR.commit();
 
         } catch (Exception e) {
@@ -35,7 +35,11 @@ public class UserHandler {
         CONNECTOR.closeConnection();
     }
 
-    private void deleteUserFromTable(String username) throws SQLException {
+    private void deleteUserFromTable(String username) throws SQLException, UserDoesNotExistException {
+
+        if (getIDByUserName(username) == 0) {
+            throw new UserDoesNotExistException("USER DOES NOT EXIST");
+        }
 
         var deleteUserFromTable = "DELETE FROM Users WHERE username = " + "'" + username + "'";
 
@@ -142,6 +146,8 @@ public class UserHandler {
         return users;
     }
 
+
+
     private int getNewestCompanyID() {
 
         var sql = "SELECT id FROM Companies ORDER BY id DESC LIMIT 1";
@@ -152,6 +158,11 @@ public class UserHandler {
 
         var sql = "SELECT id FROM Persons ORDER BY id DESC LIMIT 1";
 
+        return getID(sql);
+    }
+
+    private int getIDByUserName(String userName) {
+        var sql = "SELECT id FROM Users WHERE username = " + "'" + userName+ "'";
         return getID(sql);
     }
 
@@ -172,4 +183,10 @@ public class UserHandler {
         return id;
     }
 
+    private class UserDoesNotExistException extends Exception {
+        public UserDoesNotExistException(String errorMessage) {
+            super(errorMessage);
+        }
+
+    }
 }

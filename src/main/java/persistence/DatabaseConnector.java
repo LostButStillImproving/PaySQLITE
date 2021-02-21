@@ -21,8 +21,6 @@ public enum DatabaseConnector {
             // create a connection to the database
             connection = DriverManager.getConnection(url);
 
-            System.out.println("Connection to SQLite has been established.");
-
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
